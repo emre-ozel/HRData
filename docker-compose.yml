@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ats_dwh
+    environment:
+      POSTGRES_DB: ats
+      POSTGRES_USER: ats_user
+      POSTGRES_PASSWORD: ats_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./00_setup_raw_tables.sql:/docker-entrypoint-initdb.d/00_setup_raw_tables.sql
+      - ./01_dedup_and_clean.sql:/docker-entrypoint-initdb.d/01_dedup_and_clean.sql
+      - ./02_data_quality_checks.sql:/sql/02_data_quality_checks.sql
+      - ./03_dm_hiring_process.sql:/docker-entrypoint-initdb.d/03_dm_hiring_process.sql
+      - ./04_monthly_active_pipeline.sql:/sql/04_monthly_active_pipeline.sql
+      - ./05_cumulative_hires_by_source.sql:/sql/05_cumulative_hires_by_source.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ats_user -d ats"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
