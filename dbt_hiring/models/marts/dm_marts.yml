@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: dm_hiring_process
+    description: >
+      One row per application. Joins candidates, applications, and
+      deduplicated interviews to produce candidate name, source,
+      time-to-decision in days, and the count of passed interviews.
+    columns:
+      - name: app_id
+        description: "Primary key — application identifier"
+        tests:
+          - unique
+          - not_null
+      - name: candidate_id
+        tests:
+          - not_null
+      - name: full_name
+        tests:
+          - not_null
+      - name: source
+        tests:
+          - not_null
+      - name: time_to_decision_days
+        description: "NULL when application is still active (no decision_date)"
+      - name: passed_interviews_count
+        description: "Number of interviews with outcome = 'Passed'; 0 if none"
+        tests:
+          - not_null

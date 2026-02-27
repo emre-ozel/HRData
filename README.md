@@ -108,7 +108,18 @@ Shows one row per month from January 2024 onward, with the count of applications
 
 ### Cumulative Hires by Source (`05`)
 
-A hire is defined as an application that has a `decision_date` **and** no "Rejected" interviews. Output shows monthly and running cumulative hire counts per source.
+A hire is defined as an application that has a `decision_date` **and** no "Rejected" interviews. A full month spine is generated from January of the earliest hire year through the latest hire month, cross-joined with every source. This ensures every source has one row per month — including zero-hire months — with the cumulative total carried forward.
+
+## dbt Project (Nice-to-Have)
+
+The `dbt_hiring/` directory contains a full [dbt](https://docs.getdbt.com/) project that mirrors the raw SQL pipeline above. It provides:
+
+- **Source definitions** with built-in schema tests (uniqueness, not-null, accepted values, referential integrity)
+- **Staging, mart, and analytics models** identical in logic to the raw SQL scripts
+- **Singular tests** that replicate the data quality checks from `02_data_quality_checks.sql`
+- **Auto-generated documentation** via `dbt docs generate`
+
+See [`dbt_hiring/README.md`](dbt_hiring/README.md) for setup instructions.
 
 ## Design Decisions
 

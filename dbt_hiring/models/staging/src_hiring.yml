@@ -1,0 +1,58 @@
+version: 2
+
+sources:
+  - name: hiring_raw
+    description: "Raw ATS tables loaded by 00_setup_raw_tables.sql"
+    schema: public
+    tables:
+      - name: raw_candidates
+        description: "One row per candidate with source channel"
+        columns:
+          - name: candidate_id
+            tests:
+              - unique
+              - not_null
+          - name: full_name
+            tests:
+              - not_null
+          - name: source
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ['LinkedIn', 'Referral', 'Career Page']
+
+      - name: raw_applications
+        description: "One row per application; decision_date is NULL when still active"
+        columns:
+          - name: app_id
+            tests:
+              - unique
+              - not_null
+          - name: candidate_id
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('hiring_raw', 'raw_candidates')
+                    field: candidate_id
+
+      - name: raw_interviews
+        description: "One row per interview slot — may contain duplicates"
+        columns:
+          - name: interview_id
+            tests:
+              - unique
+              - not_null
+          - name: app_id
+            tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('hiring_raw', 'raw_applications')
+                    field: app_id
+          - name: outcome
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: ['Passed', 'Rejected', 'No Show']

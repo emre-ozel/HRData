@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: stg_candidates
+    description: "Staged candidates — direct pass-through from raw"
+    columns:
+      - name: candidate_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_applications
+    description: "Staged applications — direct pass-through from raw"
+    columns:
+      - name: app_id
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_interviews
+    description: "Staged interviews — deduplicated on (app_id, interview_date, outcome)"
+    columns:
+      - name: interview_id
+        tests:
+          - unique
+          - not_null

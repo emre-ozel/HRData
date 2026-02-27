@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: monthly_active_pipeline
+    description: >
+      One row per month. Counts applications that were active (ongoing)
+      during that month — i.e. the month falls between applied_date and
+      COALESCE(decision_date, CURRENT_DATE).
+    columns:
+      - name: report_month
+        tests:
+          - unique
+          - not_null
+      - name: active_application_count
+        tests:
+          - not_null
+
+  - name: cumulative_hires_by_source
+    description: >
+      One row per (source, hire_month). Shows monthly and running
+      cumulative hire counts per source channel, starting from January
+      of the earliest hire year. Zero-hire months are included.
+    columns:
+      - name: source
+        tests:
+          - not_null
+      - name: hire_month
+        tests:
+          - not_null
+      - name: cumulative_hires
+        tests:
+          - not_null

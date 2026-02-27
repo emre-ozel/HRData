@@ -1,0 +1,12 @@
+dbt_hiring:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5432
+      user: ats_user
+      password: ats_pass
+      dbname: ats
+      schema: public
+      threads: 2

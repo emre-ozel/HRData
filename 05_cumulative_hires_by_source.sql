@@ -3,6 +3,11 @@
 -- Part B: Cumulative Hires by Source
 -- A "hire" = application with a decision_date and NO rejected
 -- interviews (all interviews passed or no interviews at all).
+--
+-- A full month spine is generated from January of the earliest
+-- hire year through the latest hire month, cross-joined with
+-- every source so that zero-hire months still appear with a
+-- running cumulative total carried forward.
 -- ============================================================
 
 WITH hires AS (
@@ -19,14 +24,42 @@ WITH hires AS (
             AND i.outcome = 'Rejected'
       )
 ),
+
+-- Full month series starting from Jan of the earliest hire year
+month_spine AS (
+    SELECT generate_series(
+        DATE_TRUNC('year', MIN(decision_date)),
+        DATE_TRUNC('month', MAX(decision_date)),
+        INTERVAL '1 month'
+    )::DATE AS hire_month
+    FROM hires
+),
+
+-- Every source that recorded at least one hire
+sources AS (
+    SELECT DISTINCT source FROM hires
+),
+
+-- Cartesian product: one row per (source, month)
+spine AS (
+    SELECT s.source, m.hire_month
+    FROM sources s
+    CROSS JOIN month_spine m
+),
+
+-- Actual hire counts per source-month
 monthly_hires AS (
     SELECT
-        source,
-        DATE_TRUNC('month', decision_date)::DATE AS hire_month,
-        COUNT(*)                                  AS monthly_hires
-    FROM hires
-    GROUP BY source, DATE_TRUNC('month', decision_date)
+        sp.source,
+        sp.hire_month,
+        COUNT(h.app_id) AS monthly_hires
+    FROM spine sp
+    LEFT JOIN hires h
+        ON  sp.source     = h.source
+        AND sp.hire_month  = DATE_TRUNC('month', h.decision_date)::DATE
+    GROUP BY sp.source, sp.hire_month
 )
+
 SELECT
     source,
     hire_month,
